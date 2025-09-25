@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday — Ney</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+    }
+
+    #loadingScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('https://i.ibb.co/VJbrtC2/sky-bg.jpg') no-repeat center center/cover;
+      display: flex; justify-content: center; align-items: center; flex-direction: column;
+      z-index: 5000; color: white; text-align: center;
+    }
+    #loadingScreen button {
+      margin-top: 20px; padding: 12px 25px;
+      background: hotpink; border: none; border-radius: 10px;
+      color: white; font-size: 18px; cursor: pointer;
+    }
+    #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+    #mainContent {
+      display: none;
+      background: pink url('https://i.ibb.co/b6Wbn2s/tulip-bg.png');
+      background-size: contain; background-repeat: repeat;
+      min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;
+    }
+    .card {
+      background: white; border-radius: 20px; padding: 30px;
+      text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      max-width: 90vw; width: 100%;
+    }
+    h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2.5em; color: hotpink; margin-bottom: 10px;
+    }
+    .countdown {
+      display: flex; justify-content: center; gap: 15px; margin: 20px 0;
+    }
+    .countdown div {
+      background: #ffe6f2; padding: 10px 15px; border-radius: 12px;
+    }
+    button {
+      margin: 10px; padding: 12px 20px; border: none; border-radius: 10px;
+      cursor: pointer; font-size: 16px;
+    }
+    .music-btn { background: hotpink; color: white; }
+    .gift-btn { background: gold; }
+
+    .message {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+      text-align: center;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      z-index: 3000;
+    }
+
+    .message h2 {
+      color: hotpink;
+      font-family: 'Pacifico', cursive;
+      margin-bottom: 15px;
+    }
+
+    .message p {
+      font-family: 'Georgia', serif;
+      line-height: 1.6;
+      margin: 10px 0;
+      text-align: center;
+      white-space: pre-wrap;
+      padding-bottom: 10px;
+    }
+
+    .message button {
+      margin-top: 15px;
+      background: hotpink;
+      color: white;
+    }
+
+    canvas#confetti,
+    #tulipCanvas,
+    #dollCanvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    #tulipCanvas, #dollCanvas {
+      z-index: 2000;
+      display: none;
+    }
+    #dollCanvas { z-index: 2500; }
+
+    /* === RESPONSIVE STYLING === */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .countdown {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .countdown div {
+        flex: 1 1 40%;
+        text-align: center;
+        font-size: 14px;
+      }
+
+      #loadingScreen h1 {
+        font-size: 1.8em;
+        padding: 0 10px;
+      }
+
+      #loadingScreen p {
+        padding: 0 15px;
+        font-size: 16px;
+      }
+
+      #loadingScreen button {
+        font-size: 16px;
+        padding: 10px 20px;
+      }
+
+      .message {
+        width: 90%;
+        max-height: 85vh;
+        font-size: 14px;
+      }
+
+      .message h2 {
+        font-size: 1.5em;
+      }
+
+      .message p {
+        font-size: 14px;
+        padding: 0 5px;
+      }
+
+      button {
+        font-size: 14px;
+        padding: 10px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loadingScreen">
+    <canvas id="fireworks"></canvas>
+    <h1>✨ Selamat Datang ✨</h1>
+    <p>Klik untuk melihat kejutan ulang tahun 🎁</p>
+    <button onclick="enterSite()">Click for Surprise 🎉</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="mainContent">
+    <div class="card">
+      <h1>Selamat Ulang Tahun, Sayang! 💖</h1>
+      <p>Ini ada surat ucapan ulang tahun untukmu 🎂</p>
+      <p>Semoga dengan kado ini kamu bisa bahagia di hari spesialmu ✨</p>
+
+      <div class="countdown">
+        <div><span id="days">0</span><br>Hari</div>
+        <div><span id="hours">0</span><br>Jam</div>
+        <div><span id="minutes">0</span><br>Menit</div>
+        <div><span id="seconds">0</span><br>Detik</div>
+      </div>
+
+      <button class="music-btn" onclick="toggleMusic()">Putar Lagu 🎵</button>
+      <button class="gift-btn" onclick="openGift()">Buka Hadiah 🎁</button>
+    </div>
+  </div>
+
+  <!-- SURAT -->
+  <div class="message" id="letter">
+    <h2>Selamat Ulang Tahun!</h2>
+    <p>Hari ini adalah hari bahagiamu, sayang 💕.</p>
+    <p>Semoga tahun ini bukan sekadar pengulangan dari yang lalu, atau putaran waktu yang sama tanpa arah.  
+Jarum jam mungkin berdetak seperti biasa, fajar tetap membuka tirainya dari sisi yang sama,  
+namun di luar ritme yang berulang itu, semesta sedang membuka jalannya untukmu.</p>
+    <p>Setiap langkahmu kini akan lebih ringan, setiap pilihanmu akan lebih jelas,  
+dan setiap detik yang kamu lewati akan dipenuhi dengan kebahagiaan yang tulus.  
+Percayalah, perjalananmu tahun ini akan membawa senyuman baru, tawa yang lebih hangat,  
+dan momen-momen yang membuat hatimu berbunga.</p>
+    <p>Aku berharap kamu selalu merasakan cinta di sekitarmu,  
+semangat yang tak pernah padam, dan harapan yang selalu menuntunmu ke arah yang indah.  
+Tahun ini adalah babak baru dalam hidupmu, dan aku yakin kamu akan bersinar lebih terang.</p>
+    <p>Selamat ulang tahun, sayang 🎂✨.  
+Semoga setiap mimpimu menjadi nyata, setiap harimu dipenuhi tawa,  
+dan setiap langkahmu membawa kebahagiaan yang tak berujung.</p>
+    <p>— Bayu, sang Penyihir, Batam 10 November 2025</p>
+    <button onclick="closeLetter()">Tutup</button>
+  </div>
+
+  <!-- Canvases -->
+  <canvas id="confetti"></canvas>
+  <canvas id="tulipCanvas"></canvas>
+  <canvas id="dollCanvas"></canvas>
+
+  <!-- Audio -->
+  <audio id="loadingMusic" src="https://www.bensound.com/bensound-music/bensound-littleidea.mp3" autoplay loop></audio>
+  <audio id="bgMusic" src="HER_-_Best_Part_CeeNaija.com_.mp3" loop></audio>
+
+  <script>
+    function enterSite() {
+      document.getElementById("loadingScreen").style.display = "none";
+      document.getElementById("mainContent").style.display = "flex";
+      document.getElementById("loadingMusic").pause();
+
+      const music = document.getElementById("bgMusic");
+      music.play().catch(()=>{});
+      playing = true;
+    }
+
+    const canvas = document.getElementById('fireworks'); const ctx = canvas.getContext('2d');
+    function random(min, max){ return Math.random()*(max-min)+min; }
+    class Firework { constructor(){ this.x=random(0,canvas.width); this.y=canvas.height; this.targetY=random(canvas.height/4, canvas.height/2); this.speed=random(4,7); this.color=`hsl(${random(0,360)},100%,50%)`; } update(){ this.y-=this.speed; if(this.y<=this.targetY) this.explode(); } draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,3,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); } explode(){ for(let i=0;i<50;i++){ particles.push(new Particle(this.x,this.y,this.color)); } fireworks.splice(fireworks.indexOf(this),1); } }
+    class Particle { constructor(x,y,color){ this.x=x; this.y=y; this.speedX=random(-3,3); this.speedY=random(-3,3); this.life=100; this.color=color; } update(){ this.x+=this.speedX; this.y+=this.speedY; this.life--; } draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); } }
+    let fireworks=[], particles=[];
+    function animate(){ ctx.fillStyle="rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height); if(Math.random()<0.05) fireworks.push(new Firework()); fireworks.forEach(fw=>{fw.update();fw.draw();}); particles.forEach(p=>{p.update(); p.draw(); if(p.life<=0) particles.splice(particles.indexOf(p),1);}); requestAnimationFrame(animate); }
+    animate();
+
+    const targetDate = new Date("Nov 20, 2025 00:00:00").getTime();
+    setInterval(()=>{ let now=new Date().getTime(); let diff=targetDate-now;
+      document.getElementById("days").innerText=Math.floor(diff/(1000*60*60*24));
+      document.getElementById("hours").innerText=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+      document.getElementById("minutes").innerText=Math.floor((diff%(1000*60*60))/(1000*60));
+      document.getElementById("seconds").innerText=Math.floor((diff%(1000*60))/1000);
+    },1000);
+
+    const music=document.getElementById("bgMusic"); let playing=false;
+    function toggleMusic(){ if(!playing){ music.play(); playing=true; } else { music.pause(); playing=false; } }
+
+    function openGift(){ 
+      document.getElementById("letter").style.display="block"; 
+      startConfetti(); 
+      startTulipExplosion(); 
+      startDollExplosion(true); 
+    }
+    function closeLetter(){ document.getElementById("letter").style.display="none"; }
+
+    const confettiCanvas=document.getElementById("confetti"); const confettiCtx=confettiCanvas.getContext("2d");
+    let confettiPieces=[];
+    function ConfettiPiece(){ this.x=Math.random()*confettiCanvas.width; this.y=Math.random()*confettiCanvas.height-confettiCanvas.height; this.size=Math.random()*5+2; this.speed=Math.random()*3+2; this.color=`hsl(${Math.random()*360},100%,50%)`; }
+    function startConfetti(){ confettiPieces=[]; for(let i=0;i<300;i++){ confettiPieces.push(new ConfettiPiece()); } requestAnimationFrame(updateConfetti); }
+    function updateConfetti(){ confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); confettiPieces.forEach(p=>{ p.y+=p.speed; if(p.y>confettiCanvas.height)p.y=0; confettiCtx.beginPath(); confettiCtx.arc(p.x,p.y,p.size,0,Math.PI*2); confettiCtx.fillStyle=p.color; confettiCtx.fill(); }); requestAnimationFrame(updateConfetti); }
+
+    const tulipCanvas=document.getElementById("tulipCanvas"); const tulipCtx=tulipCanvas.getContext("2d");
+    let tulips=[]; let tulipActive=false;
+    class Tulip { constructor(){ this.x=Math.random()*tulipCanvas.width; this.y=tulipCanvas.height+20; this.size=Math.random()*24+16; this.speedY=Math.random()*3+2; this.speedX=(Math.random()-0.5)*2; this.opacity=1; } update(){ this.y-=this.speedY; this.x+=this.speedX; this.opacity-=0.01; } draw(){ tulipCtx.globalAlpha=this.opacity; tulipCtx.font=`${this.size}px serif`; tulipCtx.fillText("🌷",this.x,this.y); tulipCtx.globalAlpha=1; } }
+    function startTulipExplosion(){ tulipCanvas.style.display="block"; tulipActive=true; tulips=[]; for(let i=0;i<80;i++){ tulips.push(new Tulip()); } animateTulip(); }
+    function animateTulip(){ if(!tulipActive) return; tulipCtx.clearRect(0,0,tulipCanvas.width,tulipCanvas.height); tulips.forEach((t,i)=>{ t.update(); t.draw(); if(t.opacity<=0) tulips.splice(i,1); }); if(tulips.length>0){ requestAnimationFrame(animateTulip); } else { tulipActive=false; tulipCanvas.style.display="none"; } }
+
+    const dollCanvas = document.getElementById("dollCanvas"); const dollCtx = dollCanvas.getContext("2d");
+    let dolls=[]; let dollActive=false;
+    class Doll { constructor(){ this.x = Math.random() * dollCanvas.width; this.y = dollCanvas.height + 20; this.size = Math.random()*40+30; this.speedY = Math.random()*3+2; this.speedX = (Math.random()-0.5)*2; this.opacity=1; const dollsArr=["🧸","🐻","🐼","🐰","🤖"]; const flowers=["🌸","🌷","🌹","💐"]; this.emoji = dollsArr[Math.floor(Math.random()*dollsArr.length)] + flowers[Math.floor(Math.random()*flowers.length)]; } update(){ this.y-=this.speedY; this.x+=this.speedX; this.opacity-=0.01; } draw(){ dollCtx.globalAlpha=this.opacity; dollCtx.font=`${this.size}px serif`; dollCtx.fillText(this.emoji,this.x,this.y); dollCtx.globalAlpha=1; } }
+    function startDollExplosion(mute=false){ dollCanvas.style.display="block"; dollActive=true; dolls=[]; for(let i=0;i<50;i++){ dolls.push(new Doll()); } animateDoll(); }
+    function animateDoll(){ if(!dollActive) return; dollCtx.clearRect(0,0,dollCanvas.width,dollCanvas.height); dolls.forEach((d,i)=>{ d.update(); d.draw(); if(d.opacity<=0)dolls.splice(i,1); }); if(dolls.length>0){ requestAnimationFrame(animateDoll); } else { dollActive=false; dollCanvas.style.display="none"; } }
+
+    // Resize all canvases when screen resizes
+    function resizeCanvas() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+      confettiCanvas.width = innerWidth;
+      confettiCanvas.height = innerHeight;
+      tulipCanvas.width = innerWidth;
+      tulipCanvas.height = innerHeight;
+      dollCanvas.width = innerWidth;
+      dollCanvas.height = innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas(); // initial call
+  </script>
+</body>
+</html>
